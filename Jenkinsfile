@@ -178,7 +178,7 @@ pipeline {
                     cp cm-chart/values.yaml values.yml
 
                     # deploy helm staging
-                    kubectl delete pvc postgres-cast-pvc -n staging || true
+                    # kubectl delete pvc postgres-cast-pvc -n staging || true
                     helm upgrade --install cm-api cm-chart --values=values.yml --namespace staging
                     '''
                 }
