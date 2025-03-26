@@ -130,8 +130,9 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    # configmap nginx dev
                     ls -a
+
+                    # configmap nginx dev
                     kubectl create configmap nginx-config --from-file=./nginx_config.conf -n dev --dry-run=client -o yaml | kubectl apply -f -
 
                     # delete kube directory
@@ -142,7 +143,7 @@ pipeline {
                     echo "$KUBECONFIG" > ~/.kube/config
                     chmod 600 ~/.kube/config
 
-                    # Update YAML with docker tag
+                    # Update YAML
                     cp cm-chart/values.yaml values.yml
 
                     # deploy helm dev
@@ -159,6 +160,8 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    ls -a
+                    
                     # configmap nginx staging
                     kubectl create configmap nginx-config --from-file=./nginx_config.conf -n staging --dry-run=client -o yaml | kubectl apply -f -
 
