@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.cast_db.metadata.label }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.cast_db.metadata.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cast_db.metadata.label }}
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: {{ .Values.cast_db.env.ENV_DB }}
+            - name: {{ .Values.cast_db.env.ENV_DB_PASSWORD }}
+              valueFrom: 
+                secretKeyRef: 
+                  name: {{ .Values.cast_db.secret }} 
+                  key: password 
+            - name: {{ .Values.cast_db.env.ENV_DB_USER }}
+              valueFrom: 
+                secretKeyRef: 
+                  name: {{ .Values.cast_db.secret }} 
+                  key: user
+          image: {{ .Values.cast_db.image.repository }}:{{ .Values.cast_db.image.tag }}
+          name: {{ .Values.cast_db.metadata.label }}
+          ports:
+            - containerPort: {{ .Values.cast_db.service.targetPort }}
+              protocol: TCP
+          volumeMounts:
+           {{- range .Values.cast_db.volumeMounts }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+      volumes:
+       {{- range .Values.cast_db.volumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .persistentVolumeClaim.claimName }}
+        {{- end }}

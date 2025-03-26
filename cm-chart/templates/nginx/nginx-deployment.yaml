@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.nginx.metadata.label }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.nginx.metadata.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.nginx.metadata.label }}
+    spec:
+      containers:
+        - image: {{ .Values.nginx.image.repository }}
+          name: {{ .Values.nginx.metadata.label }}
+          ports:
+            - containerPort: {{ .Values.nginx.service.targetPort }}
+              protocol: TCP
+          volumeMounts:
+           {{- range .Values.nginx.volumeMounts }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+              subPath: {{ .subPath }}
+            {{- end }}
+      volumes:
+       {{- range .Values.nginx.volumes }}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .configMap.name }}
+        {{- end }}
+            items:
+              - key: nginx_config.conf
+                path: default.conf

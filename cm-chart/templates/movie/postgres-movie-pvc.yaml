@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.movie_db.pvc.name }}
+spec:
+  storageClassName: {{ .Values.movie_db.pvc.storageClassName }}
+  accessModes:
+    - {{ .Values.movie_db.pvc.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.movie_db.pvc.storage }}

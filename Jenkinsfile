@@ -1,11 +1,14 @@
 pipeline {
     environment {
-        DOCKER_ID = "syypro"
-        DOCKER_REPO = "jenkins_devops_exams_github"
+
         DOCKER_IMAGE_CAST = "cast-service"
         DOCKER_IMAGE_MOVIE = "movie-service"
+
         DOCKER_TAG_CAST = "cast-v.${BUILD_ID}.0"
         DOCKER_TAG_MOVIE = "movie-v.${BUILD_ID}.0"
+
+        DOCKER_ID = "syypro"
+
     }
 
     agent any
@@ -56,7 +59,10 @@ pipeline {
                     sh '''
                     docker login -u $DOCKER_ID -p $DOCKER_PASS
                     docker push $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG_CAST
+                    docker push $DOCKER_ID/$DOCKER_IMAGE_CAST:latest
+                    
                     docker push $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE
+                    docker push $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latest
                     '''
                 }
             }

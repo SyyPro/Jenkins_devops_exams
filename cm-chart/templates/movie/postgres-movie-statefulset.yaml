@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.movie_db.metadata.label }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.movie_db.metadata.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.movie_db.metadata.label }}
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: {{ .Values.movie_db.env.POSTGRES_DB }}
+            - name: {{ .Values.movie_db.env.ENV_DB_PASSWORD }}
+              valueFrom: 
+                secretKeyRef: 
+                  name: {{ .Values.movie_db.secret }}
+                  key: password 
+            - name: {{ .Values.movie_db.env.ENV_DB_USER }}
+              valueFrom: 
+                secretKeyRef: 
+                  name: {{ .Values.movie_db.secret }}
+                  key: user
+          image: {{ .Values.movie_db.image.repository }}:{{ .Values.movie_db.image.tag }}
+          name: {{ .Values.movie_db.metadata.label }}
+          ports:
+            - containerPort: {{ .Values.movie_db.service.targetPort }}
+              protocol: TCP
+          volumeMounts:
+           {{- range .Values.movie_db.volumeMounts }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+      volumes:
+       {{- range .Values.movie_db.volumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .persistentVolumeClaim.claimName }}
+        {{- end }}

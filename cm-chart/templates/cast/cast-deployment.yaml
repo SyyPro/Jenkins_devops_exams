@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.cast_service.metadata.label }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.cast_service.metadata.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.cast_service.metadata.label }}
+    spec:
+      containers:
+        - name: {{ .Values.cast_service.metadata.label }}
+          image: {{ .Values.cast_service.image.repository }}
+          imagePullPolicy: {{ .Values.cast_service.image.pullPolicy }}
+          command: ["{{ .Values.cast_service.spec.containers.command }}", "{{ .Values.cast_service.spec.containers.cmdoption }}"]
+          args: ["{{ .Values.cast_service.spec.containers.args }}"]
+          env:
+            - name: {{ .Values.cast_service.env.ENV_URI }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.cast_service.configmap }}
+                  key: {{ .Values.cast_service.env.ENV_URI }}
+          ports:
+            - containerPort: {{ .Values.cast_service.service.targetPort }}
+              protocol: TCP
+          volumeMounts:
+           {{- range .Values.cast_service.volumeMounts }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+      volumes:
+       {{- range .Values.cast_service.volumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .persistentVolumeClaim.claimName }}
+        {{- end }}
