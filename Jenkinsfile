@@ -114,7 +114,7 @@ pipeline {
                     sh '''
                     # configmap nginx dev
                     ls -a
-                    kubectl create configmap nginx-config --from-file=./nginx/config/nginx_config.conf -n dev --dry-run=client -o yaml | kubectl apply -f -
+                    kubectl create configmap nginx-config --from-file=./nginx_config.conf -n dev --dry-run=client -o yaml | kubectl apply -f -
 
                     # delete kube directory
                     rm -Rf ~/.kube
@@ -145,7 +145,7 @@ pipeline {
                 script {
                     sh '''
                     # configmap nginx staging
-                    kubectl create configmap nginx-config --from-file=./nginx/config/nginx_config.conf -n staging --dry-run=client -o yaml | kubectl apply -f -
+                    kubectl create configmap nginx-config --from-file=./nginx_config.conf -n staging --dry-run=client -o yaml | kubectl apply -f -
 
                     # delete kube directory
                     rm -Rf ~/.kube
