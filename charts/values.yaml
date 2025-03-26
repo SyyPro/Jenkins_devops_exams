@@ -7,7 +7,7 @@ global:
 
 cast_service:
   image:
-    repository: syypro/cast-service
+    repository: cast-service
     pullPolicy: IfNotPresent
   metadata:
     label: cast-service
@@ -77,7 +77,7 @@ cast_db:
 
 movie_service:
   image:
-    repository: syypro/movie-service
+    repository: movie-service
     pullPolicy: IfNotPresent
   metadata:
     label: movie-service
