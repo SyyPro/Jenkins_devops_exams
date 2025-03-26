@@ -24,9 +24,11 @@ pipeline {
 
                     # Build Image cast-service
                     docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG_CAST ./cast-service || exit 1
+                    docker build -t $DOCKER_ID/$DOCKER_IMAGE_CAST:latest ./cast-service || exit 1
 
                     # Build Image movie-service
                     docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE ./movie-service || exit 1
+                    docker build -t $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latest ./movie-service || exit 1
 
                     sleep 5
                     '''
