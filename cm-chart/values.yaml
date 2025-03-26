@@ -78,7 +78,7 @@ cast_db:
 
 movie_service:
   image:
-    repository: https://hub.docker.com/repository/docker/syypro/movie-service
+    repository: movie-service
     pullPolicy: IfNotPresent
   metadata:
     label: movie-service
