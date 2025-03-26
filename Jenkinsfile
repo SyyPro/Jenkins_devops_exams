@@ -46,7 +46,7 @@ pipeline {
 
                     # movie-service on port 8082
                     # docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE
-                    docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latst
+                    docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latest
 
                     docker ps
 
