@@ -72,6 +72,8 @@ cast_db:
     accessMode: ReadWriteOnce
     storage: 5Gi
     storageClassName: local-path
+    annotations:
+      "helm.sh/resource-policy": keep
 
 movie_service:
   image:
@@ -140,6 +142,8 @@ movie_db:
     accessMode: ReadWriteOnce
     storage: 5Gi
     storageClassName: local-path
+    annotations:
+      "helm.sh/resource-policy": keep
 
 nginx:
   image:
