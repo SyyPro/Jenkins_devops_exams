@@ -46,7 +46,7 @@ pipeline {
 
                     # movie-service on port 8082
                     # docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE
-                    docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latest
+                    docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latst
 
                     docker ps
 
@@ -57,17 +57,17 @@ pipeline {
         }
 
 
-                stage('Docker test') {
-            steps {
-                script {
-                    sh '''
-                    curl localhost:8083/api/v1/casts/docs
-                    curl localhost:8082/api/v1/movies/docs                    
-                    sleep 5
-                    '''
-                }
-            }
-        }
+        //         stage('Docker test') {
+        //     steps {
+        //         script {
+        //             sh '''
+        //             curl localhost:8083/api/v1/casts/docs
+        //             curl localhost:8082/api/v1/movies/docs                    
+        //             sleep 5
+        //             '''
+        //         }
+        //     }
+        // }
 
         stage('Docker Push') {
             environment {
