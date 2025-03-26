@@ -47,6 +47,22 @@ pipeline {
                     # movie-service on port 8082
                     # docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE
                     docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latest
+
+                    docker ps
+
+                    sleep 5
+                    '''
+                }
+            }
+        }
+
+
+                stage('Docker test') {
+            steps {
+                script {
+                    sh '''
+                    curl localhost:8083/api/v1/casts/docs
+                    curl localhost:8082/api/v1/movies/docs                    
                     sleep 5
                     '''
                 }
@@ -127,13 +143,10 @@ pipeline {
                     chmod 600 ~/.kube/config
 
                     # Update YAML with docker tag
-                    sed -i "s+tag.*+tag: ${DOCKER_TAG_CAST}+g" ./cast_service/values.yaml
-                    sed -i "s+tag.*+tag: ${DOCKER_TAG_MOVIE}+g" ./movie_service/values.yaml
+                    cp cm-chart/values.yaml values.yml
 
                     # deploy helm dev
-                    helm upgrade --install app-cast ./cast_service --values=./cast_service/values.yaml --namespace dev
-                    helm upgrade --install app-movie ./movie_service --values=./movie_service/values.yaml --namespace dev
-                    helm upgrade --install app-nginx ./nginx --values=./nginx/values.yaml --namespace dev
+                    helm upgrade --install cm-api cm-chart --values=values.yml --namespace dev
                     '''
                 }
             }

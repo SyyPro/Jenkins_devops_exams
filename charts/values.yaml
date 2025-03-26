@@ -8,7 +8,7 @@ global:
 cast_service:
   image:
     repository: syypro/cast-service
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   metadata:
     label: cast-service
   spec:
