@@ -71,7 +71,7 @@ cast_db:
   pvc:
     name: postgres-cast-pvc
     accessMode: ReadWriteOnce
-    storage: 5Gi
+    storage: 1Gi
     storageClassName: local-path
 
 movie_service:

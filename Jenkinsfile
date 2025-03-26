@@ -147,6 +147,7 @@ pipeline {
                     cp cm-chart/values.yaml values.yml
 
                     # deploy helm dev
+                    kubectl delete pvc postgres-cast-pvc -n dev || true
                     helm upgrade --install cm-api cm-chart --values=values.yml --namespace dev
                     '''
                 }
@@ -161,7 +162,7 @@ pipeline {
                 script {
                     sh '''
                     ls -a
-                    
+
                     # configmap nginx staging
                     kubectl create configmap nginx-config --from-file=./nginx_config.conf -n staging --dry-run=client -o yaml | kubectl apply -f -
 
@@ -173,18 +174,12 @@ pipeline {
                     echo "$KUBECONFIG" > ~/.kube/config
                     chmod 600 ~/.kube/config
 
-                    # Update YAML in value file
-                    sed -i '/namespace:/s/dev/staging/' ./cast_service/values.yaml
-                    sed -i '/namespace:/s/dev/staging/' ./movie_service/values.yaml
-                    sed -i '/namespace:/s/dev/staging/' ./nginx/values.yaml
-
-                    kubectl annotate pv movie-db-st meta.helm.sh/release-name=app-movie-staging --overwrite
-                    kubectl annotate pv movie-db-st meta.helm.sh/release-namespace=staging --overwrite
+                    # Update YAML
+                    cp cm-chart/values.yaml values.yml
 
                     # deploy helm staging
-                    helm upgrade --install app-cast-staging ./cast_service --values=./cast_service/values.yaml --namespace staging
-                    helm upgrade --install app-movie-staging ./movie_service --values=./movie_service/values.yaml --namespace staging
-                    helm upgrade --install app-nginx-staging ./nginx --values=./nginx/values.yaml --namespace staging
+                    kubectl delete pvc postgres-cast-pvc -n staging || true
+                    helm upgrade --install cm-api cm-chart --values=values.yml --namespace staging
                     '''
                 }
             }
@@ -201,8 +196,10 @@ pipeline {
 
                 script {
                     sh '''
+                    ls -a
+
                     # configmap nginx prod
-                    kubectl create configmap nginx-config --from-file=./nginx/config/nginx_config.conf -n prod --dry-run=client -o yaml | kubectl apply -f -
+                    kubectl create configmap nginx-config --from-file=./nginx_config.conf -n prod --dry-run=client -o yaml | kubectl apply -f -
 
                     # delete kube directory
                     rm -Rf ~/.kube
@@ -212,18 +209,12 @@ pipeline {
                     echo "$KUBECONFIG" > ~/.kube/config
                     chmod 600 ~/.kube/config
 
-                    # Update YAML in value file
-                    sed -i '/namespace:/s/staging/prod/' ./cast_service/values.yaml
-                    sed -i '/namespace:/s/staging/prod/' ./movie_service/values.yaml
-                    sed -i '/namespace:/s/staging/prod/' ./nginx/values.yaml
-		   
- 		            kubectl annotate pv movie-db-st meta.helm.sh/release-name=app-movie-prod --overwrite
-                    kubectl annotate pv movie-db-st meta.helm.sh/release-namespace=prod --overwrite
+                    # Update YAML
+                    cp cm-chart/values.yaml values.yml
 
-                    # deploy helm orid
-                    helm upgrade --install app-cast-prod ./cast_service --values=./cast_service/values.yaml --namespace prod
-                    helm upgrade --install app-movie-prod ./movie_service --values=./movie_service/values.yaml --namespace prod
-                    helm upgrade --install app-nginx-prod ./nginx --values=./nginx/values.yaml --namespace prod
+                    # deploy helm prod
+                    kubectl delete pvc postgres-cast-pvc -n prod || true
+                    helm upgrade --install cm-api cm-chart --values=values.yml --namespace prod
                     '''
                 }
             }
