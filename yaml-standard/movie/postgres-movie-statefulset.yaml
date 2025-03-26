@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: movie-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movie-db
+  template:
+    metadata:
+      labels:
+        app: movie-db
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: movie_db_dev
+            - name: POSTGRES_PASSWORD
+              valueFrom: 
+                secretKeyRef: 
+                  name: postgres-movie 
+                  key: password 
+            - name: POSTGRES_USER
+              valueFrom: 
+                secretKeyRef: 
+                  name: postgres-movie
+                  key: user
+          image: postgres:12.1-alpine
+          name: movie-db
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data-movie
+      volumes:
+        - name: postgres-data-movie
+          persistentVolumeClaim:
+            claimName: postgres-movie-pvc

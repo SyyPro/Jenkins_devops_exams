@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movie-service
+  template:
+    metadata:
+      labels:
+        app: movie-service
+    spec:
+      containers:
+        - name: movie-service
+          image: jenkins_devops_exams_movie_service
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args: ["uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"]
+          env:
+            - name: CAST_SERVICE_HOST_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: movie-configmap
+                  key: cast_host_url             
+            - name: DATABASE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: movie-configmap
+                  key: DATABASE_URI
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/movie-data
+              name: movie-data
+      volumes:
+        - name: movie-data
+          persistentVolumeClaim:
+            claimName: movie-pvc

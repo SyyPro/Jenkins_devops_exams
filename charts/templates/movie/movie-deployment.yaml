@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.movie_service.metadata.label }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.movie_service.metadata.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.movie_service.metadata.label }}
+    spec:
+      containers:
+        - name: {{ .Values.movie_service.metadata.label }}
+          image: {{ .Values.movie_service.image.repository }}
+          imagePullPolicy: {{ .Values.movie_service.image.pullPolicy }}
+          command: ["{{ .Values.movie_service.spec.containers.command }}", "{{ .Values.movie_service.spec.containers.cmdoption }}"]
+          args: ["{{ .Values.movie_service.spec.containers.args }}"]
+          env:
+            - name: {{ .Values.movie_service.env.ENV_HOST }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.movie_service.configmap }}
+                  key: {{ .Values.movie_service.env.ENV_HOST }}             
+            - name: {{ .Values.movie_service.env.ENV_URI }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.movie_service.configmap }}
+                  key: {{ .Values.movie_service.env.ENV_URI }}
+          ports:
+            - containerPort: {{ .Values.movie_service.service.targetPort }}
+              protocol: TCP
+          volumeMounts:
+           {{- range .Values.movie_service.volumeMounts }}
+            - mountPath: {{ .mountPath }}
+              name: {{ .name }}
+            {{- end }}
+      volumes:
+       {{- range .Values.movie_service.volumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .persistentVolumeClaim.claimName }}
+        {{- end }}

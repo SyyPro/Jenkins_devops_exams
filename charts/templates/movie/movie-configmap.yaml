@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.movie_service.configmap }}
+data:
+  {{ .Values.movie_service.env.ENV_HOST }}: http://cast-service:8002/api/v1/casts/
+  {{ .Values.movie_service.env.ENV_URI }}: postgresql://movie_db_username:movie_db_password@movie-db/movie_db_dev

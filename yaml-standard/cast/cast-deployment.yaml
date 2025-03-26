@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cast-service
+  template:
+    metadata:
+      labels:
+        app: cast-service
+    spec:
+      containers:
+        - name: cast-service
+          image: jenkins_devops_exams_cast_service
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args: ["uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"]
+          env:
+            - name: DATABASE_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: cast-configmap
+                  key: DATABASE_URI
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/cast-data
+              name: cast-data
+      volumes:
+        - name: cast-data
+          persistentVolumeClaim:
+            claimName: cast-pvc

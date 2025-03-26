@@ -1,85 +1,165 @@
-# Default values for fastapiapp.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+global:
+  namespaces:
+    - dev
+    - staging
+    - qa
+    - prod
 
-replicaCount: 3
+cast_service:
+  image:
+    repository: jenkins_devops_exams_cast_service
+    pullPolicy: IfNotPresent
+  metadata:
+    label: cast-service
+  spec:
+    replicaCount: 1
+    containers:
+      command: "bash"
+      cmdoption: "-c"
+      args: "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+  env:
+    ENV_URI: DATABASE_URI 
+  service:
+    name: cast-service
+    type: NodePort
+    port: 8083
+    targetPort: 8000
+  volumeMounts:
+    - mountPath: "/home/cast-data"
+      name: cast-data
+  volumes:
+    - name: cast-data
+      persistentVolumeClaim:
+        claimName: cast-pvc
+  configmap: cast-configmap
+  
+  pvc:
+    name: cast-pvc
+    accessMode: ReadWriteOnce
+    storage: 100Mi
+    storageClassName: local-path
 
-image:
-  repository: sajjadhz/fastapiapp
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+cast_db:
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
+  metadata:
+    label: cast-db
+  spec:
+    replicaCount: 1
+  env:
+    ENV_DB: cast_db_dev
+    ENV_DB_USER: POSTGRES_USER
+    ENV_DB_PASSWORD: POSTGRES_PASSWORD 
+    
+  service:
+    name: cast-db
+    type: ClusterIP
+    port: 5433
+    targetPort: 5432
+  volumeMounts:
+    - mountPath: "/var/lib/postgresql/data"
+      name: postgres-data-cast
+  volumes:
+    - name: postgres-data-cast
+      persistentVolumeClaim:
+        claimName: postgres-cast-pvc
+  secret: postgres-cast
 
-imagePullSecrets: 
-  - name: "regcred"
-nameOverride: ""
-fullnameOverride: ""
+  pvc:
+    name: postgres-cast-pvc
+    accessMode: ReadWriteOnce
+    storage: 5Gi
+    storageClassName: local-path
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
+movie_service:
+  image:
+    repository: jenkins_devops_exams_movie_service
+    pullPolicy: IfNotPresent
+  metadata:
+    label: movie-service
+  spec:
+    replicaCount: 1
+    containers:
+      command: "bash"
+      cmdoption: "-c"
+      args: "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+  env:
+    ENV_URI: DATABASE_URI
+    ENV_HOST: CAST_SERVICE_HOST_URL     
+  service:
+    name: movie-service
+    type: NodePort
+    port: 8082
+    targetPort: 8000
+  volumeMounts:
+    - mountPath: "/home/movie-data"
+      name: movie-data
+  volumes:
+    - name: movie-data
+      persistentVolumeClaim:
+        claimName: movie-pvc
+  configmap: movie-configmap
 
-podAnnotations: {}
+  pvc:
+    name: movie-pvc
+    accessMode: ReadWriteOnce
+    storage: 100Mi
+    storageClassName: local-path
 
-podSecurityContext: {}
-  # fsGroup: 2000
+movie_db:
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+  metadata:
+    label: movie-db
+  spec:
+    replicaCount: 1
+  env:
+    POSTGRES_DB: movie_db_dev
+    ENV_DB_USER: POSTGRES_USER
+    ENV_DB_PASSWORD: POSTGRES_PASSWORD
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+  service:
+    name: movie-db
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  volumeMounts:
+    - mountPath: "/var/lib/postgresql/data"
+      name: postgres-data-movie
+  volumes:
+    - name: postgres-data-movie
+      persistentVolumeClaim:
+        claimName: postgres-movie-pvc
+  secret: postgres-movie
 
-service:
-  type: NodePort
-  port: 80
-  nodePort: 30007  
-  targetPort: 8000
+  pvc:
+    name: postgres-movie-pvc
+    accessMode: ReadWriteOnce
+    storage: 5Gi
+    storageClassName: local-path
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+nginx:
+  image:
+    repository: nginx
+    tag: label
+  metadata:
+    label: nginx
+  spec:
+    replicaCount: 1
+  service:
+    name: nginx
+    type: NodePort
+    port: 8081
+    targetPort: 8080
+  configmap: nginx-configmap
+  volumeMounts:
+    - mountPath: "/etc/nginx/conf.d/default.conf"
+      name: nginx-conf
+      subPath: default.conf
+  volumes:
+    - name: nginx-conf
+      configMap:
+        name: nginx-configmap
