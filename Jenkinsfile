@@ -41,10 +41,12 @@ pipeline {
                 script {
                     sh '''
                     # cast-service on port 8083
-                    docker run -d -p 8083:8000 --name cast-service $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG_CAST
+                    # docker run -d -p 8083:8000 --name cast-service $DOCKER_ID/$DOCKER_IMAGE_CAST:$DOCKER_TAG_CAST
+                    docker run -d -p 8083:8000 --name cast-service $DOCKER_ID/$DOCKER_IMAGE_CAST:latest
 
                     # movie-service on port 8082
-                    docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE
+                    # docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:$DOCKER_TAG_MOVIE
+                    docker run -d -p 8082:8000 --name movie-service $DOCKER_ID/$DOCKER_IMAGE_MOVIE:latest
                     sleep 5
                     '''
                 }
