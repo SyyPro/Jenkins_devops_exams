@@ -147,7 +147,7 @@ pipeline {
                     cp cm-chart/values.yaml values.yml
 
                     # deploy helm dev
-                    kubectl delete pvc postgres-cast-pvc -n dev || true
+                    # kubectl delete pvc postgres-cast-pvc -n dev || true
                     helm upgrade --install cm-api cm-chart --values=values.yml --namespace dev
                     '''
                 }
@@ -213,7 +213,7 @@ pipeline {
                     cp cm-chart/values.yaml values.yml
 
                     # deploy helm prod
-                    kubectl delete pvc postgres-cast-pvc -n prod || true
+                    # kubectl delete pvc postgres-cast-pvc -n prod || true
                     helm upgrade --install cm-api cm-chart --values=values.yml --namespace prod
                     '''
                 }
